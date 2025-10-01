@@ -176,26 +176,13 @@ export function CRMDashboard() {
   }
 
   const handleCall = () => {
-    if (dialedNumber && callStatus === "idle") {
-      setCallStatus("dialing")
-      setTimeout(() => setCallStatus("active"), 1500)
-      setCallDuration(0)
-    }
-  }
-
-  const handleHangup = () => {
-    setCallStatus("idle")
-    setDialedNumber("")
-    setCallDuration(0)
-    setIsMuted(false)
+    // Use the real handleManualDial function
+    handleManualDial()
   }
 
   const handleHold = () => {
-    if (callStatus === "active") {
-      setCallStatus("hold")
-    } else if (callStatus === "hold") {
-      setCallStatus("active")
-    }
+    // TODO: Implement hold functionality in softphone
+    console.log("[Hold] Not yet implemented")
   }
 
   const handleClear = () => {
@@ -212,14 +199,14 @@ export function CRMDashboard() {
 
   const getStatusText = () => {
     switch (callStatus) {
-      case "dialing":
-        return "DIALING..."
+      case "idle":
+        return "NO ACTIVE CALL"
       case "ringing":
         return "RINGING"
-      case "active":
+      case "connected":
         return "ACTIVE"
-      case "hold":
-        return "ON HOLD"
+      case "ended":
+        return "CALL ENDED"
       default:
         return "NO ACTIVE CALL"
     }
@@ -244,10 +231,6 @@ export function CRMDashboard() {
         router.push("/activity?type=calls&range=today")
         break
     }
-  }
-
-  const handleManualDial = () => {
-    document.getElementById("softphone-input")?.focus()
   }
 
   const handleOpenContactProfile = () => {
