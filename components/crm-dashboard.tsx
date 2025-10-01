@@ -84,21 +84,22 @@ export function CRMDashboard() {
   const [showCallbackModal, setShowCallbackModal] = useState(false)
   const [showDispositionModal, setShowDispositionModal] = useState(false)
 
-  const [currentCustomer, setCurrentCustomer] = useState({
-    leadId: "lead-12345",
-    name: "Sarah Johnson",
-    phone: "+1 (555) 123-4567",
-    email: "sarah.johnson@techcorp.com",
-    company: "TechCorp Inc.",
-    address: "123 Main St, San Francisco, CA 94102",
-    customerTime: "PST (GMT-8)",
-    channel: "Inbound Call",
-    customerInfo: "Interested in enterprise plan, previous customer",
-    recordingFile: "REC-2024-001234.mp3",
-    recordId: "CRM-2024-5678",
-    dealValue: "$12,500",
-    status: "Active",
-  })
+  // NO PLACEHOLDER DATA - Will be populated when call is placed
+  const [currentCustomer, setCurrentCustomer] = useState<{
+    leadId?: string
+    name?: string
+    phone?: string
+    email?: string
+    company?: string
+    address?: string
+    customerTime?: string
+    channel?: string
+    customerInfo?: string
+    recordingFile?: string
+    recordId?: string
+    dealValue?: string
+    status?: string
+  } | null>(null)
 
   // Auto-launch disposition modal when call ends
   useEffect(() => {
@@ -122,7 +123,7 @@ export function CRMDashboard() {
       
       if (result.success) {
         // Step 2: Connect softphone
-        await softphone.call(dialedNumber, undefined, currentCustomer.name)
+        await softphone.call(dialedNumber, undefined, currentCustomer?.name || "Unknown")
         toast.success("Call initiated")
       } else {
         toast.error(result.message)
@@ -234,23 +235,29 @@ export function CRMDashboard() {
   }
 
   const handleOpenContactProfile = () => {
-    if (currentCustomer.leadId) {
+    if (currentCustomer?.leadId) {
       window.open(`/contacts/${currentCustomer.leadId}`, "_blank")
     }
   }
 
   const handleCustomerNameClick = () => {
-    router.push(`/contacts/${currentCustomer.leadId}`)
+    if (currentCustomer?.leadId) {
+      router.push(`/contacts/${currentCustomer.leadId}`)
+    }
   }
 
   const handlePhoneClick = () => {
-    setDialedNumber(currentCustomer.phone)
+    if (currentCustomer?.phone) {
+      setDialedNumber(currentCustomer.phone)
+    }
     // Auto-focus softphone
     document.getElementById("softphone-input")?.focus()
   }
 
   const handleCompanyClick = () => {
-    router.push(`/contacts?company=${encodeURIComponent(currentCustomer.company)}`)
+    if (currentCustomer?.company) {
+      router.push(`/contacts?company=${encodeURIComponent(currentCustomer.company)}`)
+    }
   }
 
   const handleRecordingFileClick = () => {
@@ -258,11 +265,15 @@ export function CRMDashboard() {
   }
 
   const handleRecordIdClick = () => {
-    router.push(`/contacts/${currentCustomer.leadId}#record=${currentCustomer.recordId}`)
+    if (currentCustomer?.leadId && currentCustomer?.recordId) {
+      router.push(`/contacts/${currentCustomer.leadId}#record=${currentCustomer.recordId}`)
+    }
   }
 
   const handleDealValueClick = () => {
-    router.push(`/deals?lead=${currentCustomer.leadId}`)
+    if (currentCustomer?.leadId) {
+      router.push(`/deals?lead=${currentCustomer.leadId}`)
+    }
   }
 
   return (
@@ -290,12 +301,13 @@ export function CRMDashboard() {
                 priority
               />
               <Button
-                onClick={() => router.push("/")}
+                onClick={handleOpenContactProfile}
                 variant="ghost"
-                className="text-yellow-400/80 hover:text-yellow-400 hover:bg-yellow-500/20"
-                title="Back to Home"
+                className="text-yellow-400/80 hover:text-yellow-400 hover:bg-yellow-500/20 ml-2"
+                title="Open profile in new tab"
+                disabled={!currentCustomer?.leadId}
               >
-                <Home className="h-5 w-5" />
+                <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
 
@@ -406,24 +418,24 @@ export function CRMDashboard() {
               {[
                 {
                   title: "Total Contacts",
-                  value: "2,847",
-                  change: "+12%",
+                  value: "-",
+                  change: "No data",
                   icon: Users,
                   color: "text-blue-400",
                   type: "contacts",
                 },
                 {
                   title: "Meetings",
-                  value: "24",
-                  change: "+5%",
+                  value: "-",
+                  change: "No data",
                   icon: Calendar,
                   color: "text-purple-400",
                   type: "meetings",
                 },
                 {
                   title: "Calls Made Today",
-                  value: "47",
-                  change: "+18%",
+                  value: "-",
+                  change: "No data",
                   icon: Phone,
                   color: "text-green-400",
                   type: "calls",
@@ -438,7 +450,7 @@ export function CRMDashboard() {
                     <div>
                       <p className="text-yellow-400/70 text-sm mb-1">{stat.title}</p>
                       <p className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</p>
-                      <p className={`text-sm font-medium ${stat.color}`}>{stat.change}</p>
+                      <p className={`text-sm font-medium text-white/40`}>{stat.change}</p>
                     </div>
                     <stat.icon className={`h-8 w-8 md:h-10 md:w-10 ${stat.color}`} />
                   </div>
@@ -451,15 +463,17 @@ export function CRMDashboard() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-lg md:text-xl font-semibold text-white">Customer Information</h3>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge
-                    className={`text-xs ${
-                      currentCustomer.status === "Active"
-                        ? "bg-green-500/20 text-green-400 border-green-400/30"
-                        : "bg-gray-500/20 text-gray-400 border-gray-400/30"
-                    }`}
-                  >
-                    {currentCustomer.status}
-                  </Badge>
+                  {currentCustomer?.status && (
+                    <Badge
+                      className={`text-xs ${
+                        currentCustomer.status === "Active"
+                          ? "bg-green-500/20 text-green-400 border-green-400/30"
+                          : "bg-gray-500/20 text-gray-400 border-gray-400/30"
+                      }`}
+                    >
+                      {currentCustomer.status}
+                    </Badge>
+                  )}
                   <Button size="sm" variant="ghost" className="text-white/90 hover:bg-yellow-500/20 hover:text-white">
                     <Filter className="mr-2 h-4 w-4" />
                     Filter
@@ -471,6 +485,13 @@ export function CRMDashboard() {
                 </div>
               </div>
 
+              {!currentCustomer ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <User className="h-16 w-16 text-white/20 mb-4" />
+                  <p className="text-white/60 text-lg mb-2">No Customer Selected</p>
+                  <p className="text-white/40 text-sm">Place a call to load customer information</p>
+                </div>
+              ) : (
               <div className="space-y-4">
                 {/* Row 1: Name and Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -602,21 +623,24 @@ export function CRMDashboard() {
                   </Button>
                 </div>
               </div>
+              )}
             </Card>
 
-            {/* Script Panel */}
-            <ScriptPanel
-              leadId={currentCustomer.leadId}
-              customerData={{
-                firstName: currentCustomer.name.split(" ")[0],
-                lastName: currentCustomer.name.split(" ")[1] || "",
-                company: currentCustomer.company,
-                amount: currentCustomer.dealValue,
-                city: currentCustomer.address.split(",")[1]?.trim() || "San Francisco",
-                phone: currentCustomer.phone,
-                email: currentCustomer.email,
-              }}
-            />
+            {/* Script Panel - Only show if customer exists */}
+            {currentCustomer && (
+              <ScriptPanel
+                leadId={currentCustomer.leadId || ""}
+                customerData={{
+                  firstName: currentCustomer.name?.split(" ")[0] || "",
+                  lastName: currentCustomer.name?.split(" ")[1] || "",
+                  company: currentCustomer.company || "",
+                  amount: currentCustomer.dealValue || "",
+                  city: currentCustomer.address?.split(",")[1]?.trim() || "",
+                  phone: currentCustomer.phone || "",
+                  email: currentCustomer.email || "",
+                }}
+              />
+            )}
           </div>
 
           {/* Right Column - Softphone */}
