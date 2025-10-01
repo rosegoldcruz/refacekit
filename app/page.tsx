@@ -288,18 +288,16 @@ export default function MarketingHome() {
             Join home services teams using our platform to connect with more leads and close more deals.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/pricing">
+            <Link
+              href="/pricing"
+              className="inline-block"
+            >
               <Button
                 size="lg"
                 className="text-base font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-8"
               >
                 View Pricing Plans
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="text-base font-medium h-12 px-8 bg-transparent">
-                Try Demo Dashboard
               </Button>
             </Link>
           </div>
