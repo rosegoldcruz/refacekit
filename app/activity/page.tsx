@@ -20,36 +20,49 @@ import {
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { useState, useEffect } from "react"
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.aeonops.com"
 
 export default function ActivityPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const type = searchParams.get("type")
   const range = searchParams.get("range")
+  
+  const [activityMetrics, setActivityMetrics] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Mock data - replace with actual VICIdial API calls
-  const activityMetrics = {
-    totalCalls: 47,
-    totalTalkTime: "3h 24m",
-    totalTalkTimeSec: 12240,
-    totalPauseTime: "45m",
-    totalPauseTimeSec: 2700,
-    totalWaitTime: "1h 12m",
-    totalWaitTimeSec: 4320,
-    totalWrapUpTime: "38m",
-    totalWrapUpTimeSec: 2280,
-    loginTime: "8h 15m",
-    loginTimeSec: 29700,
-    activeCallsToday: 47,
-    sales: 8,
-    callbacksSet: 12,
-    meetingsBooked: 5,
-    transferCount: 3,
-    averageTalkTime: "4m 20s",
-    averageHandleTime: "5m 8s",
-    conversionRate: 17.0,
-    contactsReached: 42,
-    callsPerHour: 5.7,
+  // Fetch real-time metrics from VICIdial API
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/stats/realtime`)
+        const data = await response.json()
+        
+        if (data.status === "ok") {
+          setActivityMetrics(data.data)
+        }
+      } catch (error) {
+        console.error("Failed to fetch activity metrics:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMetrics()
+    
+    // Refresh every 5 seconds
+    const interval = setInterval(fetchMetrics, 5000)
+    return () => clearInterval(interval)
+  }, [range])
+
+  if (loading || !activityMetrics) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="text-yellow-400 text-xl">Loading real-time metrics...</div>
+      </div>
+    )
   }
 
   const formatPercentage = (value: number) => {

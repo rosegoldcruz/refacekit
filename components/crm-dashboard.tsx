@@ -69,7 +69,7 @@ export function CRMDashboard() {
     sipServer: "wss://api.aeonops.com:8089/ws", // WSS with valid SSL cert
     sipUsername: agentUser,
     sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "agent001pass",
-    sipExtension: `${agentUser}-endpoint`,
+    sipExtension: agentUser, // Use username directly, not -endpoint suffix
     autoRegister: true // ✅ ENABLED: SSL cert is valid for api.aeonops.com
   })
 
