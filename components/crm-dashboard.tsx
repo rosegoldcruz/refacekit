@@ -44,21 +44,36 @@ import { SendDemoModal } from "@/components/modals/send-demo-modal"
 import { ScheduleMeetingModal } from "@/components/modals/schedule-meeting-modal"
 import { CallbackModal } from "@/components/modals/callback-modal"
 import { TagStatusPopover } from "@/components/modals/tag-status-popover"
+import { MandatoryDispositionModal } from "@/components/modals/mandatory-disposition-modal"
 import { ScriptPanel } from "@/components/script-panel"
 import { AIChatInterface } from "@/components/ai-chat-interface"
+import { useSoftphone } from "@/hooks/use-softphone"
+import { manualDial } from "@/lib/vicidial-api"
+import { toast } from "sonner"
 
 export function CRMDashboard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const hasProcessedDialParam = useRef(false)
   const [dialedNumber, setDialedNumber] = useState("")
-  const [callStatus, setCallStatus] = useState<"idle" | "dialing" | "ringing" | "active" | "hold">("idle")
   const [isMuted, setIsMuted] = useState(false)
-  const [callDuration, setCallDuration] = useState(0)
   const [isAgentReady, setIsAgentReady] = useState(false)
-  const [isRegistered, setIsRegistered] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
 
+  // Agent configuration - TODO: Get from Clerk user
+  const agentUser = "agent001"
+  const campaignId = "DEFAULT"
+
+  // Initialize WebRTC softphone
+  const softphone = useSoftphone({
+    sipServer: process.env.NEXT_PUBLIC_SIP_SERVER || "147.182.253.110",
+    sipUsername: agentUser,
+    sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "1234",
+    sipExtension: agentUser,
+    autoRegister: true
+  })
+
+  // Modal states
   const [showAddContactModal, setShowAddContactModal] = useState(false)
   const [showEmailModal, setShowEmailModal] = useState(false)
   const [showNoteModal, setShowNoteModal] = useState(false)
@@ -67,6 +82,7 @@ export function CRMDashboard() {
   const [showSendDemoModal, setShowSendDemoModal] = useState(false)
   const [showScheduleMeetingModal, setShowScheduleMeetingModal] = useState(false)
   const [showCallbackModal, setShowCallbackModal] = useState(false)
+  const [showDispositionModal, setShowDispositionModal] = useState(false)
 
   const [currentCustomer, setCurrentCustomer] = useState({
     leadId: "lead-12345",
@@ -84,16 +100,49 @@ export function CRMDashboard() {
     status: "Active",
   })
 
-  // Call timer
+  // Auto-launch disposition modal when call ends
   useEffect(() => {
-    let interval: NodeJS.Timeout
-    if (callStatus === "active") {
-      interval = setInterval(() => {
-        setCallDuration((prev) => prev + 1)
-      }, 1000)
+    if (softphone.callState === 'ended' && softphone.currentCall) {
+      setShowDispositionModal(true)
     }
-    return () => clearInterval(interval)
-  }, [callStatus])
+  }, [softphone.callState, softphone.currentCall])
+
+  // Manual dial handler - REAL INTEGRATION
+  const handleManualDial = async () => {
+    if (!dialedNumber) {
+      toast.error("Please enter a phone number")
+      return
+    }
+
+    try {
+      toast.info("Placing call...")
+      
+      // Step 1: Trigger VICIdial external_dial
+      const result = await manualDial(dialedNumber, agentUser, campaignId)
+      
+      if (result.success) {
+        // Step 2: Connect softphone
+        await softphone.call(dialedNumber, undefined, currentCustomer.name)
+        toast.success("Call initiated")
+      } else {
+        toast.error(result.message)
+      }
+    } catch (error) {
+      console.error("[Manual Dial] Error:", error)
+      toast.error("Failed to place call")
+    }
+  }
+
+  // Hangup handler
+  const handleHangup = async () => {
+    await softphone.hangup()
+    toast.info("Call ended")
+  }
+
+  // Use real softphone state instead of fake state
+  const callStatus = softphone.callState
+  const callDuration = softphone.callDuration
+  const isRegistered = softphone.isRegistered
 
   // Keyboard shortcut for search
   useEffect(() => {
@@ -760,6 +809,25 @@ export function CRMDashboard() {
       <ScheduleMeetingModal isOpen={showScheduleMeetingModal} onClose={() => setShowScheduleMeetingModal(false)} />
 
       <CallbackModal isOpen={showCallbackModal} onClose={() => setShowCallbackModal(false)} />
+
+      {/* MANDATORY DISPOSITION MODAL - BLOCKS UI AFTER CALL */}
+      <MandatoryDispositionModal
+        isOpen={showDispositionModal}
+        onClose={(disposition) => {
+          if (disposition) {
+            // Disposition submitted successfully
+            setShowDispositionModal(false)
+            toast.success("Disposition submitted")
+            // Clear call data
+            setDialedNumber("")
+          }
+        }}
+        phoneNumber={softphone.currentCall?.phoneNumber || dialedNumber}
+        contactName={softphone.currentCall?.contactName || currentCustomer.name}
+        leadId={softphone.currentCall?.leadId || parseInt(currentCustomer.leadId.replace("lead-", ""))}
+        campaignId={campaignId}
+        agentUser={agentUser}
+      />
     </div>
   )
 }
