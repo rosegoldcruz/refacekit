@@ -388,7 +388,7 @@ export function CRMDashboard() {
                 </Button>
                 <Button
                   onClick={handleOpenContactProfile}
-                  disabled={!currentCustomer.leadId}
+                  disabled={!currentCustomer?.leadId}
                   variant="ghost"
                   className="w-full justify-start text-white/90 hover:bg-yellow-500/20 hover:text-white transition-all text-sm md:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Open contact profile in new tab"
@@ -498,7 +498,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Customer Name</label>
                     <Input
-                      value={currentCustomer.name}
+                      value={currentCustomer.name || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, name: e.target.value })}
                       onClick={handleCustomerNameClick}
                       className="bg-black/40 border-yellow-500/30 text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 cursor-pointer hover:border-yellow-500/50"
@@ -507,7 +507,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Phone Number</label>
                     <Input
-                      value={currentCustomer.phone}
+                      value={currentCustomer.phone || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, phone: e.target.value })}
                       onClick={handlePhoneClick}
                       className="bg-black/40 border-yellow-500/30 text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 cursor-pointer hover:border-yellow-500/50"
@@ -520,7 +520,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Email</label>
                     <Input
-                      value={currentCustomer.email}
+                      value={currentCustomer.email || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, email: e.target.value })}
                       onClick={() => setShowEmailModal(true)}
                       className="w-full bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
@@ -529,7 +529,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Company</label>
                     <Input
-                      value={currentCustomer.company}
+                      value={currentCustomer.company || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, company: e.target.value })}
                       onClick={handleCompanyClick}
                       className="w-full bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
@@ -541,7 +541,7 @@ export function CRMDashboard() {
                 <div>
                   <label className="text-yellow-400/70 text-sm mb-2 block">Address</label>
                   <Input
-                    value={currentCustomer.address}
+                    value={currentCustomer.address || ""}
                     onChange={(e) => setCurrentCustomer({ ...currentCustomer, address: e.target.value })}
                     className="w-full bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
                   />
@@ -552,7 +552,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Customer Time</label>
                     <Input
-                      value={currentCustomer.customerTime}
+                      value={currentCustomer.customerTime || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, customerTime: e.target.value })}
                       className="bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
                     />
@@ -560,7 +560,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Channel</label>
                     <Input
-                      value={currentCustomer.channel}
+                      value={currentCustomer.channel || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, channel: e.target.value })}
                       className="bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
                     />
@@ -571,7 +571,7 @@ export function CRMDashboard() {
                 <div>
                   <label className="text-yellow-400/70 text-sm mb-2 block">Customer Information</label>
                   <textarea
-                    value={currentCustomer.customerInfo}
+                    value={currentCustomer.customerInfo || ""}
                     onChange={(e) => setCurrentCustomer({ ...currentCustomer, customerInfo: e.target.value })}
                     rows={3}
                     className="w-full bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
@@ -583,7 +583,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Recording File</label>
                     <Input
-                      value={currentCustomer.recordingFile}
+                      value={currentCustomer.recordingFile || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, recordingFile: e.target.value })}
                       onClick={handleRecordingFileClick}
                       className="bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
@@ -592,7 +592,7 @@ export function CRMDashboard() {
                   <div>
                     <label className="text-yellow-400/70 text-sm mb-2 block">Record ID</label>
                     <Input
-                      value={currentCustomer.recordId}
+                      value={currentCustomer.recordId || ""}
                       onChange={(e) => setCurrentCustomer({ ...currentCustomer, recordId: e.target.value })}
                       onClick={handleRecordIdClick}
                       className="bg-black/40 border border-yellow-500/30 rounded-lg text-white placeholder:text-white/40 focus:border-yellow-500/50 focus:bg-black/50 p-3 resize-none"
