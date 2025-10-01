@@ -287,3 +287,50 @@ export async function getRealtimeStats(): Promise<any> {
     return null
   }
 }
+
+/**
+ * Place manual dial call through VICIdial
+ */
+export async function manualDial(
+  phoneNumber: string,
+  agentUser: string,
+  campaignId: string,
+  leadId?: number
+): Promise<{ success: boolean; message: string; call_id?: string }> {
+  try {
+    const params = new URLSearchParams({
+      phone_number: phoneNumber,
+      agent_user: agentUser,
+      campaign_id: campaignId,
+    })
+    
+    if (leadId) {
+      params.append('lead_id', leadId.toString())
+    }
+
+    const response = await fetch(`${API_BASE}/dial/manual?${params.toString()}`, {
+      method: 'POST',
+    })
+    
+    const data = await response.json()
+    
+    if (data.status === 'ok') {
+      return {
+        success: true,
+        message: data.data.message,
+        call_id: data.data.call_id
+      }
+    } else {
+      return {
+        success: false,
+        message: data.data?.message || 'Failed to place call'
+      }
+    }
+  } catch (error) {
+    console.error('[VICIdial API] manualDial error:', error)
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to place call'
+    }
+  }
+}
