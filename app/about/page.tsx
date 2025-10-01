@@ -14,7 +14,7 @@ export default function AboutPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-center mb-8">Our Story</h2>
           <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
             <p>
-              CallCenter Pro was born from frustration. Our founder spent years managing call centers for home services
+              Aeon Ops was born from frustration. Our founder spent years managing call centers for home services
               companies and saw the same problem everywhere: leads were falling through the cracks between CRM systems
               and dialers.
             </p>
@@ -136,7 +136,7 @@ export default function AboutPage() {
               data entry.
             </p>
             <p>
-              We knew there had to be a better way. So we built it. CallCenter Pro automatically syncs leads between
+              We knew there had to be a better way. So we built it. Aeon Ops automatically syncs leads between
               your CRM and dialer in real-time, logs all call activity back to your CRM, and works with the tools you
               already use. No more data entry. No more missed opportunities. Just more conversations and more closed
               deals.

@@ -14,7 +14,7 @@ export default function PrivacyPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Introduction</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  CallCenter Pro ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy
+                  Aeon Ops ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy
                   explains how we collect, use, disclose, and safeguard your information when you use our call center
                   platform and services.
                 </p>

@@ -12,7 +12,7 @@ export default function PricingPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -278,9 +278,9 @@ export default function PricingPage() {
               <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
                 <Phone className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="font-bold">CallCenter Pro</span>
+              <span className="font-bold">Aeon Ops</span>
             </div>
-            <p className="text-sm text-muted-foreground">© 2025 CallCenter Pro. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© 2025 Aeon Ops. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -14,7 +14,7 @@ export default function TermsPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Agreement to Terms</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  By accessing or using CallCenter Pro's services, you agree to be bound by these Terms of Service. If
+                  By accessing or using Aeon Ops's services, you agree to be bound by these Terms of Service. If
                   you do not agree to these terms, you may not access or use our services.
                 </p>
               </section>
@@ -52,7 +52,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Description of Services</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  CallCenter Pro provides a cloud-based call center platform that integrates with CRM systems and
+                  Aeon Ops provides a cloud-based call center platform that integrates with CRM systems and
                   dialing platforms. Our services include:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
@@ -121,7 +121,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Intellectual Property</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  All content, features, and functionality of our services are owned by CallCenter Pro and protected by
+                  All content, features, and functionality of our services are owned by Aeon Ops and protected by
                   copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or
                   create derivative works without our express written permission.
                 </p>
@@ -148,7 +148,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Limitation of Liability</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  To the maximum extent permitted by law, CallCenter Pro shall not be liable for any indirect,
+                  To the maximum extent permitted by law, Aeon Ops shall not be liable for any indirect,
                   incidental, special, consequential, or punitive damages, including lost profits, data loss, or
                   business interruption, arising from your use of our services.
                 </p>
@@ -157,7 +157,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="text-2xl font-bold mb-4">Indemnification</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  You agree to indemnify and hold harmless CallCenter Pro from any claims, damages, or expenses arising
+                  You agree to indemnify and hold harmless Aeon Ops from any claims, damages, or expenses arising
                   from your use of our services, violation of these terms, or infringement of any third-party rights.
                 </p>
               </section>

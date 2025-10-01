@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 
 const faqs = [
   {
-    question: "How do I connect my CRM to CallCenter Pro?",
+    question: "How do I connect my CRM to Aeon Ops?",
     answer:
       "Navigate to Settings > Integrations and select your CRM platform (GoHighLevel, HubSpot, or Salesforce). Follow the authentication flow to grant access, and your leads will automatically sync within minutes.",
   },
@@ -79,7 +79,7 @@ export default function SupportPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <div className="flex items-center gap-3">

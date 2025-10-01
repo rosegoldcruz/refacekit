@@ -81,7 +81,7 @@ export default function DocumentationPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -103,7 +103,7 @@ export default function DocumentationPage() {
             Everything You Need to Know
           </h1>
           <p className="text-xl text-muted-foreground text-balance leading-relaxed">
-            Comprehensive guides, API references, and tutorials to help you get the most out of CallCenter Pro
+            Comprehensive guides, API references, and tutorials to help you get the most out of Aeon Ops
           </p>
         </div>
 

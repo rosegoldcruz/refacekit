@@ -15,7 +15,7 @@ export default function TCPAPage() {
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Phone className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-bold">CallCenter Pro</span>
+            <span className="text-xl font-bold">Aeon Ops</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export default function TCPAPage() {
 
         {/* How We Help */}
         <div className="max-w-6xl mx-auto mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">How CallCenter Pro Helps You Stay Compliant</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">How Aeon Ops Helps You Stay Compliant</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="rounded-xl border border-border bg-card p-6">
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
