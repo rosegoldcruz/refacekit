@@ -6,6 +6,9 @@ import { getContacts, getRealtimeStats } from '@/lib/vicidial-api'
 import { CRMDashboard } from "@/components/crm-dashboard"
 import { toast } from 'sonner'
 
+// Prevent static generation since we use real-time data
+export const dynamic = 'force-dynamic'
+
 export default function DashboardPage() {
   // TODO: Get agent user from Clerk auth
   const [agentUser] = useState('agent001')
