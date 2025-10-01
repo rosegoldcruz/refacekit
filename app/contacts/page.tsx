@@ -1,61 +1,28 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@clerk/nextjs"
 import { Search, Phone, Mail, ArrowLeft } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { getContacts, searchContacts } from "@/lib/vicidial-api"
 
-// Mock data - replace with actual API call
-const mockLeads = [
-  {
-    id: "lead-001",
-    name: "Sarah Johnson",
-    email: "sarah.johnson@techcorp.com",
-    phone: "+1 (555) 123-4567",
-    created: "2024-01-10",
-    lastActivity: "10 minutes ago",
-    tags: ["Enterprise", "Hot Lead"],
-  },
-  {
-    id: "lead-002",
-    name: "Michael Chen",
-    email: "mchen@innovate.io",
-    phone: "+1 (555) 234-5678",
-    created: "2024-01-08",
-    lastActivity: "2 hours ago",
-    tags: ["SMB", "Warm"],
-  },
-  {
-    id: "lead-003",
-    name: "Emily Rodriguez",
-    email: "emily.r@globaltech.com",
-    phone: "+1 (555) 345-6789",
-    created: "2024-01-12",
-    lastActivity: "5 minutes ago",
-    tags: ["Enterprise", "Decision Maker"],
-  },
-  {
-    id: "lead-004",
-    name: "David Kim",
-    email: "dkim@startupxyz.com",
-    phone: "+1 (555) 456-7890",
-    created: "2023-12-15",
-    lastActivity: "3 days ago",
-    tags: ["Startup", "Cold"],
-  },
-  {
-    id: "lead-005",
-    name: "Jessica Martinez",
-    email: "jmartinez@enterprise.com",
-    phone: "+1 (555) 567-8901",
-    created: "2024-01-15",
-    lastActivity: "1 hour ago",
-    tags: ["Enterprise", "Hot Lead", "C-Level"],
-  },
-]
+export const dynamic = 'force-dynamic'
+
+interface Lead {
+  lead_id: number
+  first_name: string
+  last_name: string
+  phone_number: string
+  email: string | null
+  city: string | null
+  state: string | null
+  status: string
+  called_count: number
+  last_local_call_time: string | null
+  entry_date?: string
+}
 
 function getInitials(name: string) {
   return name
@@ -66,164 +33,179 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
-function getAvatarColor(name: string) {
+function getAvatarColor(index: number) {
   const colors = [
-    "bg-pink-500",
-    "bg-red-500",
-    "bg-orange-500",
-    "bg-amber-500",
-    "bg-yellow-500",
-    "bg-lime-500",
-    "bg-green-500",
-    "bg-emerald-500",
-    "bg-teal-500",
-    "bg-cyan-500",
-    "bg-sky-500",
-    "bg-blue-500",
-    "bg-indigo-500",
-    "bg-violet-500",
-    "bg-purple-500",
-    "bg-fuchsia-500",
+    "bg-pink-500", "bg-red-500", "bg-orange-500", "bg-amber-500",
+    "bg-yellow-500", "bg-lime-500", "bg-green-500", "bg-emerald-500",
+    "bg-teal-500", "bg-cyan-500", "bg-sky-500", "bg-blue-500",
+    "bg-indigo-500", "bg-violet-500", "bg-purple-500", "bg-fuchsia-500",
   ]
-  const index = name.charCodeAt(0) % colors.length
-  return colors[index]
+  return colors[index % colors.length]
 }
 
-export default function ContactsPage() {
+function ContactsContent() {
   const router = useRouter()
+  const { isSignedIn } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
-  const [leads, setLeads] = useState(mockLeads)
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const filteredLeads = leads.filter((lead) => {
-    const matchesSearch =
-      lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      lead.phone.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesSearch
-  })
+  useEffect(() => {
+    if (!isSignedIn) {
+      router.push('/sign-in')
+      return
+    }
 
-  const handleRowClick = (leadId: string) => {
-    router.push(`/contacts/${leadId}`)
+    const loadContacts = async () => {
+      setLoading(true)
+      try {
+        const data = await getContacts(undefined, 100)
+        setLeads(data)
+      } catch (error) {
+        console.error('Failed to load contacts:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadContacts()
+  }, [isSignedIn, router])
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query)
+    if (query.trim().length > 0) {
+      setLoading(true)
+      try {
+        const data = await searchContacts(query, 100)
+        setLeads(data)
+      } catch (error) {
+        console.error('Search failed:', error)
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      const data = await getContacts(undefined, 100)
+      setLeads(data)
+    }
   }
 
-  const handlePhoneClick = (phone: string, e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent row click
-    router.push(`/dashboard?dial=${encodeURIComponent(phone)}`)
+  if (!isSignedIn) {
+    return null
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/dashboard")}
-          className="mb-4 text-gray-400 hover:text-white hover:bg-white/5"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
-        </Button>
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-          Contacts
-        </h1>
-        <p className="text-gray-400">Manage and view all your leads</p>
-      </div>
+    <div className="min-h-screen bg-background p-6">
+      <Button
+        variant="ghost"
+        className="mb-6"
+        onClick={() => router.back()}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Dashboard
+      </Button>
 
-      {/* Search */}
-      <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search by name, email, or phone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-          />
-        </div>
-      </div>
+      <div className="mx-auto max-w-7xl">
+        <h1 className="text-3xl font-bold mb-2">Contacts</h1>
+        <p className="text-muted-foreground mb-6">Manage and view all your leads</p>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="text-left p-4 text-sm font-semibold text-gray-300">Name</th>
-                <th className="text-left p-4 text-sm font-semibold text-gray-300">Phone</th>
-                <th className="text-left p-4 text-sm font-semibold text-gray-300">Email</th>
-                <th className="text-left p-4 text-sm font-semibold text-gray-300">Created</th>
-                <th className="text-left p-4 text-sm font-semibold text-gray-300">Last Activity</th>
-                <th className="text-left p-4 text-sm font-semibold text-gray-300">Tags</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.map((lead) => (
-                <tr
-                  key={lead.id}
-                  onClick={() => handleRowClick(lead.id)}
-                  className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
-                >
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-10 h-10 rounded-full ${getAvatarColor(lead.name)} flex items-center justify-center text-white font-semibold text-sm`}
-                      >
-                        {getInitials(lead.name)}
-                      </div>
-                      <span className="font-medium text-white">{lead.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div
-                      onClick={(e) => handlePhoneClick(lead.phone, e)}
-                      className="flex items-center gap-2 text-gray-300 hover:text-blue-400 cursor-pointer transition-colors"
-                      title="Click to dial"
-                    >
-                      <Phone className="h-4 w-4 text-blue-400" />
-                      {lead.phone}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2 text-gray-300">
-                      <Mail className="h-4 w-4 text-blue-400" />
-                      {lead.email}
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-300 text-sm">{lead.created}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2 text-blue-400 text-sm">
-                      <Phone className="h-3 w-3" />
-                      {lead.lastActivity}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-1">
-                      {lead.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-blue-500/20 text-blue-300"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredLeads.length === 0 && (
-          <div className="p-12 text-center text-gray-400">
-            <p>No leads found matching your criteria.</p>
+        <div className="bg-card rounded-lg border shadow-sm">
+          <div className="p-6 border-b">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by name, email, or phone..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Stats Footer */}
-      <div className="mt-6 text-sm text-gray-400">
-        Total Leads: <span className="text-white font-medium">{filteredLeads.length}</span>
+          <div className="divide-y">
+            <div className="grid grid-cols-[auto,1fr,1fr,1fr,auto,auto,auto] gap-4 p-4 text-sm font-medium text-muted-foreground bg-muted/50">
+              <div></div>
+              <div>Name</div>
+              <div>Phone</div>
+              <div>Email</div>
+              <div>Created</div>
+              <div>Last Activity</div>
+              <div>Tags</div>
+            </div>
+
+            {loading ? (
+              <div className="p-8 text-center text-muted-foreground">
+                Loading contacts...
+              </div>
+            ) : leads.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                No contacts found
+              </div>
+            ) : (
+              leads.map((lead, index) => {
+                const fullName = `${lead.first_name} ${lead.last_name}`.trim()
+                const lastActivity = lead.last_local_call_time
+                  ? new Date(lead.last_local_call_time).toLocaleString()
+                  : 'Never'
+                const created = lead.entry_date
+                  ? new Date(lead.entry_date).toLocaleDateString()
+                  : 'N/A'
+
+                return (
+                  <div
+                    key={lead.lead_id}
+                    className="grid grid-cols-[auto,1fr,1fr,1fr,auto,auto,auto] gap-4 p-4 items-center hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/contacts/${lead.lead_id}`)}
+                  >
+                    <div className={`w-10 h-10 rounded-full ${getAvatarColor(index)} flex items-center justify-center text-white font-medium`}>
+                      {getInitials(fullName || 'NA')}
+                    </div>
+                    <div>
+                      <div className="font-medium">{fullName || 'No Name'}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {lead.city && lead.state ? `${lead.city}, ${lead.state}` : 'No location'}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{lead.phone_number}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{lead.email || 'No email'}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">{created}</div>
+                    <div className="text-sm text-muted-foreground">{lastActivity}</div>
+                    <div className="flex gap-1">
+                      <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+                        {lead.status}
+                      </span>
+                      {lead.called_count > 0 && (
+                        <span className="px-2 py-1 text-xs rounded-full bg-blue-500/10 text-blue-500">
+                          {lead.called_count} calls
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+
+          {!loading && leads.length > 0 && (
+            <div className="p-4 border-t bg-muted/30 text-sm text-muted-foreground">
+              Total Leads: <span className="font-medium text-foreground">{leads.length}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
+  )
+}
+
+export default function ContactsPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <ContactsContent />
+    </Suspense>
   )
 }

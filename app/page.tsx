@@ -46,7 +46,7 @@ export default function MarketingHome() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link href="/dashboard">
+            <Link href="/sign-in">
               <Button variant="ghost" className="text-sm font-medium">
                 Agent Login
               </Button>
