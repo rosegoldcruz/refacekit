@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useVicidialAgent } from '@/hooks/use-vicidial-agent'
 import { getContacts, getRealtimeStats } from '@/lib/vicidial-api'
 import { CRMDashboard } from "@/components/crm-dashboard"
@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 // Prevent static generation since we use real-time data
 export const dynamic = 'force-dynamic'
 
-export default function DashboardPage() {
+function DashboardContent() {
   // TODO: Get agent user from Clerk auth
   const [agentUser] = useState('agent001')
   const [contacts, setContacts] = useState([])
@@ -61,5 +61,13 @@ export default function DashboardPage() {
       contacts={contacts}
       realtimeStats={realtimeStats}
     />
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   )
 }
