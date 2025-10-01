@@ -66,7 +66,7 @@ export function CRMDashboard() {
 
   // Initialize WebRTC softphone - ASTERISK WSS NOW CONFIGURED!
   const softphone = useSoftphone({
-    sipServer: "147.182.253.110", // Just the IP - hook will build full WSS URL
+    sipServer: "vici.aeonops.com", // Use domain name for SSL cert validation
     sipUsername: agentUser,
     sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "agent001pass",
     sipExtension: `${agentUser}-endpoint`,
