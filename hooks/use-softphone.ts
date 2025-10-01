@@ -211,7 +211,7 @@ export function useSoftphone(config: SoftphoneConfig) {
       if (session) {
         if (session.state === SessionState.Established) {
           await session.bye()
-        } else {
+        } else if (session instanceof Inviter) {
           await session.cancel()
         }
         console.log('[SOFTPHONE] Call ended')
@@ -276,18 +276,20 @@ export function useSoftphone(config: SoftphoneConfig) {
     // Don't clear it here - let the disposition handler clear it
   }, [stopCallTimer])
 
-  // Auto-register on mount
+  // Auto-register on mount (DISABLED until Asterisk WSS is configured)
   useEffect(() => {
-    if (config.autoRegister !== false) {
-      register()
-    }
+    // TEMP DISABLED: Auto-register causes page hang until Asterisk WSS is configured
+    // if (config.autoRegister !== false) {
+    //   register()
+    // }
 
     return () => {
-      hangup()
-      unregister()
-      stopCallTimer()
+      if (callTimerRef.current) {
+        clearInterval(callTimerRef.current)
+      }
     }
-  }, [config.autoRegister, register, unregister])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return {
     // State
