@@ -64,13 +64,13 @@ export function CRMDashboard() {
   const agentUser = "agent001"
   const campaignId = "DEFAULT"
 
-  // Initialize WebRTC softphone (auto-register disabled until Asterisk WSS configured)
+  // Initialize WebRTC softphone - ASTERISK WSS NOW CONFIGURED!
   const softphone = useSoftphone({
-    sipServer: process.env.NEXT_PUBLIC_SIP_SERVER || "147.182.253.110",
+    sipServer: `wss://${process.env.NEXT_PUBLIC_SIP_SERVER || "147.182.253.110"}:8089/ws`,
     sipUsername: agentUser,
-    sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "1234",
-    sipExtension: agentUser,
-    autoRegister: false // DISABLED: Asterisk WSS not configured yet
+    sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "agent001pass",
+    sipExtension: `${agentUser}-endpoint`,
+    autoRegister: true // ✅ ENABLED: Asterisk WSS is configured
   })
 
   // Modal states

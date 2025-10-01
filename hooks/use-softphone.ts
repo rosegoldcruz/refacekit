@@ -276,12 +276,11 @@ export function useSoftphone(config: SoftphoneConfig) {
     // Don't clear it here - let the disposition handler clear it
   }, [stopCallTimer])
 
-  // Auto-register on mount (DISABLED until Asterisk WSS is configured)
+  // Auto-register on mount - NOW ENABLED with Asterisk WSS configured
   useEffect(() => {
-    // TEMP DISABLED: Auto-register causes page hang until Asterisk WSS is configured
-    // if (config.autoRegister !== false) {
-    //   register()
-    // }
+    if (config.autoRegister !== false) {
+      register()
+    }
 
     return () => {
       if (callTimerRef.current) {
