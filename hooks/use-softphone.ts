@@ -46,13 +46,20 @@ export function useSoftphone(config: SoftphoneConfig) {
       setIsConnecting(true)
       setError(null)
 
-      const uri = UserAgent.makeURI(`sip:${config.sipUsername}@${config.sipServer}`)
+      // Extract server from config (may already include protocol and port)
+      const serverUrl = config.sipServer.startsWith('wss://') 
+        ? config.sipServer 
+        : `wss://${config.sipServer}:8089/ws`
+      
+      const serverHost = config.sipServer.replace(/^wss?:\/\//, '').split(':')[0]
+      
+      const uri = UserAgent.makeURI(`sip:${config.sipUsername}@${serverHost}`)
       if (!uri) {
         throw new Error('Failed to create SIP URI')
       }
 
       const transportOptions = {
-        server: `wss://${config.sipServer}:7443`,
+        server: serverUrl,
         traceSip: true
       }
 
