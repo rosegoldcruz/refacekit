@@ -793,24 +793,24 @@ export function CRMDashboard() {
       <EmailModal
         isOpen={showEmailModal}
         onClose={() => setShowEmailModal(false)}
-        defaultEmail={currentCustomer.email}
+        defaultEmail={currentCustomer?.email || ""}
       />
 
-      <NoteModal isOpen={showNoteModal} onClose={() => setShowNoteModal(false)} contactName={currentCustomer.name} />
+      <NoteModal isOpen={showNoteModal} onClose={() => setShowNoteModal(false)} contactName={currentCustomer?.name || ""} />
 
       <TransferModal isOpen={showTransferModal} onClose={() => setShowTransferModal(false)} />
 
       <AudioPlayerModal
         isOpen={showAudioPlayerModal}
         onClose={() => setShowAudioPlayerModal(false)}
-        recordingFile={currentCustomer.recordingFile}
+        recordingFile={currentCustomer?.recordingFile || ""}
       />
 
       <SendDemoModal
         isOpen={showSendDemoModal}
         onClose={() => setShowSendDemoModal(false)}
-        defaultEmail={currentCustomer.email}
-        defaultPhone={currentCustomer.phone}
+        defaultEmail={currentCustomer?.email || ""}
+        defaultPhone={currentCustomer?.phone || ""}
       />
 
       <ScheduleMeetingModal isOpen={showScheduleMeetingModal} onClose={() => setShowScheduleMeetingModal(false)} />
@@ -830,8 +830,8 @@ export function CRMDashboard() {
           }
         }}
         phoneNumber={softphone.currentCall?.phoneNumber || dialedNumber}
-        contactName={softphone.currentCall?.contactName || currentCustomer.name}
-        leadId={softphone.currentCall?.leadId || parseInt(currentCustomer.leadId.replace("lead-", ""))}
+        contactName={softphone.currentCall?.contactName || currentCustomer?.name || "Unknown"}
+        leadId={softphone.currentCall?.leadId || (currentCustomer?.leadId ? parseInt(currentCustomer.leadId.replace("lead-", "")) : 0)}
         campaignId={campaignId}
         agentUser={agentUser}
       />
