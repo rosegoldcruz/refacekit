@@ -66,11 +66,11 @@ export function CRMDashboard() {
 
   // Initialize WebRTC softphone - ASTERISK WSS NOW CONFIGURED!
   const softphone = useSoftphone({
-    sipServer: "vici.aeonops.com", // Use domain name for SSL cert validation
+    sipServer: "wss://api.aeonops.com:8089/ws", // WSS with valid SSL cert
     sipUsername: agentUser,
     sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "agent001pass",
     sipExtension: `${agentUser}-endpoint`,
-    autoRegister: true // ✅ ENABLED: Asterisk WSS is configured
+    autoRegister: true // ✅ ENABLED: SSL cert is valid for api.aeonops.com
   })
 
   // Modal states
