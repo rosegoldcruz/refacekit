@@ -47,7 +47,7 @@ import { TagStatusPopover } from "@/components/modals/tag-status-popover"
 import { MandatoryDispositionModal } from "@/components/modals/mandatory-disposition-modal"
 import { ScriptPanel } from "@/components/script-panel"
 import { AIChatInterface } from "@/components/ai-chat-interface"
-import { useSoftphone } from "@/hooks/use-softphone"
+import AeonSoftphone from "@/components/AeonSoftphone"
 import { manualDial } from "@/lib/vicidial-api"
 import { toast } from "sonner"
 
@@ -63,15 +63,6 @@ export function CRMDashboard() {
   // Agent configuration - TODO: Get from Clerk user
   const agentUser = "agent001"
   const campaignId = "DEFAULT"
-
-  // Initialize WebRTC softphone - ASTERISK WSS NOW CONFIGURED!
-  const softphone = useSoftphone({
-    sipServer: "wss://api.aeonops.com:8089/ws", // WSS with valid SSL cert
-    sipUsername: agentUser,
-    sipPassword: process.env.NEXT_PUBLIC_SIP_PASSWORD || "agent001pass",
-    sipExtension: agentUser, // Use username directly, not -endpoint suffix
-    autoRegister: true // ✅ ENABLED: SSL cert is valid for api.aeonops.com
-  })
 
   // Modal states
   const [showAddContactModal, setShowAddContactModal] = useState(false)
@@ -101,49 +92,6 @@ export function CRMDashboard() {
     status?: string
   } | null>(null)
 
-  // Auto-launch disposition modal when call ends
-  useEffect(() => {
-    if (softphone.callState === 'ended' && softphone.currentCall) {
-      setShowDispositionModal(true)
-    }
-  }, [softphone.callState, softphone.currentCall])
-
-  // Manual dial handler - REAL INTEGRATION
-  const handleManualDial = async () => {
-    if (!dialedNumber) {
-      toast.error("Please enter a phone number")
-      return
-    }
-
-    try {
-      toast.info("Placing call...")
-      
-      // Step 1: Trigger VICIdial external_dial
-      const result = await manualDial(dialedNumber, agentUser, campaignId)
-      
-      if (result.success) {
-        // Step 2: Connect softphone
-        await softphone.call(dialedNumber, undefined, currentCustomer?.name || "Unknown")
-        toast.success("Call initiated")
-      } else {
-        toast.error(result.message)
-      }
-    } catch (error) {
-      console.error("[Manual Dial] Error:", error)
-      toast.error("Failed to place call")
-    }
-  }
-
-  // Hangup handler
-  const handleHangup = async () => {
-    await softphone.hangup()
-    toast.info("Call ended")
-  }
-
-  // Use real softphone state instead of fake state
-  const callStatus = softphone.callState
-  const callDuration = softphone.callDuration
-  const isRegistered = softphone.isRegistered
 
   // Keyboard shortcut for search
   useEffect(() => {
@@ -172,46 +120,6 @@ export function CRMDashboard() {
     }
   }, [searchParams, router])
 
-  const handleDialpadClick = (digit: string) => {
-    setDialedNumber((prev) => prev + digit)
-  }
-
-  const handleCall = () => {
-    // Use the real handleManualDial function
-    handleManualDial()
-  }
-
-  const handleHold = () => {
-    // TODO: Implement hold functionality in softphone
-    console.log("[Hold] Not yet implemented")
-  }
-
-  const handleClear = () => {
-    if (dialedNumber.length > 0) {
-      setDialedNumber((prev) => prev.slice(0, -1))
-    }
-  }
-
-  const formatCallDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, "0")}`
-  }
-
-  const getStatusText = () => {
-    switch (callStatus) {
-      case "idle":
-        return "NO ACTIVE CALL"
-      case "ringing":
-        return "RINGING"
-      case "connected":
-        return "ACTIVE"
-      case "ended":
-        return "CALL ENDED"
-      default:
-        return "NO ACTIVE CALL"
-    }
-  }
 
   const handleGlobalSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -350,15 +258,6 @@ export function CRMDashboard() {
             <Card className="backdrop-blur-md bg-black/30 border border-yellow-500/20 rounded-2xl p-4">
               <h3 className="text-base md:text-lg font-semibold text-white mb-3">Quick Actions</h3>
               <div className="space-y-2">
-                <Button
-                  onClick={handleManualDial}
-                  variant="ghost"
-                  className="w-full justify-start text-white/90 hover:bg-yellow-500/20 hover:text-white transition-all text-sm md:text-base"
-                  title="Focus the softphone number input"
-                >
-                  <Phone className="mr-3 h-4 w-4" />
-                  Manual Dial
-                </Button>
                 <Button
                   onClick={() => setShowSendDemoModal(true)}
                   variant="ghost"
@@ -645,145 +544,7 @@ export function CRMDashboard() {
 
           {/* Right Column - Softphone */}
           <div className="lg:col-span-12 xl:col-span-3">
-            <Card className="backdrop-blur-md bg-black/30 border border-yellow-500/20 rounded-2xl p-4">
-              {/* Softphone Header */}
-              <div className="text-center mb-6">
-                <h3 className="text-lg md:text-xl font-semibold text-white mb-2">Softphone</h3>
-                <Badge
-                  className={`${
-                    callStatus === "idle"
-                      ? "bg-gray-500/20 text-gray-400 border-gray-400/30"
-                      : callStatus === "active"
-                        ? "bg-green-500/20 text-green-400 border-green-400/30"
-                        : callStatus === "hold"
-                          ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-                          : "bg-blue-500/20 text-blue-400 border-blue-400/30"
-                  }`}
-                >
-                  {getStatusText()}
-                </Badge>
-                <div className="flex items-center justify-center gap-4 mt-2">
-                  <div className="flex items-center gap-1">
-                    <div className={`w-2 h-2 rounded-full ${isRegistered ? "bg-green-400" : "bg-gray-400"}`} />
-                    <span className="text-xs text-white/60">{isRegistered ? "Active" : "Inactive"}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Signal className="h-3 w-3 text-white/60" />
-                    <span className="text-xs text-white/60">Strong</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Ready/Not Ready toggle for automatic dialer */}
-              <div className="mb-4">
-                <Button
-                  onClick={() => setIsAgentReady(!isAgentReady)}
-                  className={`w-full ${
-                    isAgentReady ? "bg-green-500 hover:bg-green-600" : "bg-gray-600 hover:bg-gray-700"
-                  } text-white transition-all`}
-                >
-                  {isAgentReady ? "Ready" : "Not Ready"}
-                </Button>
-              </div>
-
-              {/* Display Screen */}
-              <Card className="bg-black/50 border border-yellow-500/30 rounded-xl p-4 mb-6">
-                <div className="text-center">
-                  <input
-                    id="softphone-input"
-                    type="text"
-                    value={dialedNumber}
-                    onChange={(e) => setDialedNumber(e.target.value)}
-                    className="text-xl md:text-2xl font-mono text-white tracking-wider min-h-[28px] md:min-h-[32px] bg-transparent border-none outline-none text-center w-full"
-                    placeholder="---"
-                  />
-                  {callStatus === "active" && (
-                    <p className="text-sm text-white/60 mt-2">{formatCallDuration(callDuration)}</p>
-                  )}
-                </div>
-              </Card>
-
-              {/* Keypad */}
-              <div className="mb-6">
-                <div className="grid grid-cols-3 gap-2 mb-2">
-                  {["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"].map((digit) => (
-                    <Button
-                      key={digit}
-                      onClick={() => handleDialpadClick(digit)}
-                      className="h-10 md:h-12 rounded-full bg-black/40 hover:bg-yellow-500/20 border border-yellow-500/30 text-white text-base md:text-lg font-semibold transition-all hover:scale-105 hover:border-yellow-500/50"
-                    >
-                      {digit}
-                    </Button>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleClear}
-                    variant="ghost"
-                    size="sm"
-                    className="flex-1 text-yellow-400/80 hover:text-yellow-400 hover:bg-yellow-500/20"
-                  >
-                    <Delete className="h-4 w-4 mr-1" />
-                    Clear
-                  </Button>
-                </div>
-              </div>
-
-              {/* Call Controls */}
-              <div className="space-y-2 mb-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    onClick={handleCall}
-                    disabled={!dialedNumber || callStatus !== "idle" || !isAgentReady}
-                    className="bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                  >
-                    <PhoneCall className="h-4 w-4 mr-2" />
-                    Call
-                  </Button>
-                  <Button
-                    onClick={handleHangup}
-                    disabled={callStatus === "idle"}
-                    className="bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                  >
-                    <PhoneOff className="h-4 w-4 mr-2" />
-                    Hangup
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    onClick={handleHold}
-                    disabled={callStatus !== "active" && callStatus !== "hold"}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                  >
-                    <Pause className="h-4 w-4 mr-2" />
-                    {callStatus === "hold" ? "Resume" : "Hold"}
-                  </Button>
-                  <Button
-                    onClick={() => setShowTransferModal(true)}
-                    disabled={callStatus !== "active"}
-                    className="bg-blue-500 hover:bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                  >
-                    <PhoneForwarded className="h-4 w-4 mr-2" />
-                    Transfer
-                  </Button>
-                </div>
-              </div>
-
-              {/* Utility Row */}
-              <div className="flex items-center justify-center gap-4 pt-4 border-t border-yellow-500/20">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setIsMuted(!isMuted)}
-                  disabled={callStatus !== "active"}
-                  className="text-yellow-400/80 hover:text-yellow-400 hover:bg-yellow-500/20 disabled:opacity-50"
-                  title={isMuted ? "Unmute" : "Mute"}
-                >
-                  {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                  <span className="ml-1 text-xs">{isMuted ? "Muted" : "Mute"}</span>
-                </Button>
-              </div>
-            </Card>
+            <AeonSoftphone />
           </div>
         </div>
       </div>
@@ -817,24 +578,6 @@ export function CRMDashboard() {
 
       <CallbackModal isOpen={showCallbackModal} onClose={() => setShowCallbackModal(false)} />
 
-      {/* MANDATORY DISPOSITION MODAL - BLOCKS UI AFTER CALL */}
-      <MandatoryDispositionModal
-        isOpen={showDispositionModal}
-        onClose={(disposition) => {
-          if (disposition) {
-            // Disposition submitted successfully
-            setShowDispositionModal(false)
-            toast.success("Disposition submitted")
-            // Clear call data
-            setDialedNumber("")
-          }
-        }}
-        phoneNumber={softphone.currentCall?.phoneNumber || dialedNumber}
-        contactName={softphone.currentCall?.contactName || currentCustomer?.name || "Unknown"}
-        leadId={softphone.currentCall?.leadId || (currentCustomer?.leadId ? parseInt(currentCustomer.leadId.replace("lead-", "")) : 0)}
-        campaignId={campaignId}
-        agentUser={agentUser}
-      />
     </div>
   )
 }
